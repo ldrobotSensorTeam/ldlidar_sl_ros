@@ -131,7 +131,7 @@ source devel/setup.bash
 - The product is LDROBOT LiDAR LD14
 
   ``` bash
-  roslaunch ldlidar_stl_ros ld14.launch
+  roslaunch ldlidar_sl_ros ld14.launch
   ```
 
 ## step 3: test
