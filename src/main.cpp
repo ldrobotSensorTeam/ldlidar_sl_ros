@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 	n.getParam("port_name", port_name);
 	n.getParam("frame_id", frame_id);
   
-  ROS_INFO("[ldrobot] SDK Pack Version is v2.1.3");
+  ROS_INFO("[ldrobot] SDK Pack Version is v2.1.4");
   ROS_INFO("[ldrobot] <product_name>: %s,<topic_name>: %s,<port_name>: %s,<frame_id>: %s", 
     product_name.c_str(), topic_name.c_str(), port_name.c_str(), frame_id.c_str());
 
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
       exit(EXIT_FAILURE);
     }
 
-    ros::Rate r(6); //hz
+    ros::Rate r(6); //Hz
 
     while (ros::ok()) {
       if (lidar_pkg->IsFrameReady()) {
