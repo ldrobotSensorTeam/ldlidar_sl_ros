@@ -1,6 +1,6 @@
 /**
  * @file main.cpp
- * @author LDRobot (marketing1@ldrobot.com)
+ * @author LDRobot (contact@ldrobot.com)
  * @brief  main process App
  *         This code is only applicable to LDROBOT LiDAR LD00 LD03 LD08 LD14
  * products sold by Shenzhen LDROBOT Co., LTD
@@ -19,7 +19,6 @@
  * limitations under the License.
  */
 #include <ros/ros.h>
-#include <sensor_msgs/LaserScan.h>
 #include <stdio.h>
 
 #include <iostream>
@@ -35,22 +34,35 @@ int main(int argc, char **argv) {
 	std::string topic_name;
 	std::string port_name;
 	std::string frame_id;
+  bool laser_scan_dir = true;
+  bool enable_angle_crop_func = false;
+  double angle_crop_min = 0.0;
+  double angle_crop_max = 0.0;
 
   n.getParam("product_name", product_name);
 	n.getParam("topic_name", topic_name);
 	n.getParam("port_name", port_name);
 	n.getParam("frame_id", frame_id);
-  
-  ROS_INFO("[ldrobot] SDK Pack Version is v2.1.4");
-  ROS_INFO("[ldrobot] <product_name>: %s,<topic_name>: %s,<port_name>: %s,<frame_id>: %s", 
+  n.getParam("laser_scan_dir", laser_scan_dir);
+  n.getParam("enable_angle_crop_func", enable_angle_crop_func);
+  n.getParam("angle_crop_min", angle_crop_min);
+  n.getParam("angle_crop_max", angle_crop_max);
+
+  ROS_INFO(" [ldrobot] SDK Pack Version is v2.1.5");
+  ROS_INFO(" [ldrobot] <product_name>: %s,<topic_name>: %s,<port_name>: %s,<frame_id>: %s", 
     product_name.c_str(), topic_name.c_str(), port_name.c_str(), frame_id.c_str());
+
+  ROS_INFO(" [ldrobot] <laser_scan_dir>: %s,<enable_angle_crop_func>: %s,<angle_crop_min>: %f,<angle_crop_max>: %f",
+   (laser_scan_dir?"Counterclockwise":"Clockwise"), (enable_angle_crop_func?"true":"false"), angle_crop_min, angle_crop_max);
+
 
   LiPkg *lidar_pkg = nullptr;
   uint32_t baudrate = 0;
  
   if(product_name == "LDLiDAR_LD14") {
     baudrate = 115200;
-    lidar_pkg = new LiPkg(frame_id, LDVersion::LD_FOURTEEN);
+    lidar_pkg = new LiPkg(frame_id, LDVersion::LD_FOURTEEN, laser_scan_dir,
+       enable_angle_crop_func, angle_crop_min, angle_crop_max);
   } else{
     ROS_ERROR(" [ldrobot] Error, input param <product_name> is fail!!");
     exit(EXIT_FAILURE);
@@ -62,9 +74,9 @@ int main(int argc, char **argv) {
   }
   ros::Publisher lidar_pub = nh.advertise<sensor_msgs::LaserScan>( topic_name, 10); // create a ROS topic 
 
-  CmdInterfaceLinux cmd_port(baudrate);
-
   if (port_name.empty() == false) {
+    CmdInterfaceLinux cmd_port(baudrate);
+
     cmd_port.SetReadCallback([&lidar_pkg](const char *byte, size_t len) {
       if (lidar_pkg->Parse((uint8_t *)byte, len)) {
         lidar_pkg->AssemblePacket();
@@ -84,26 +96,13 @@ int main(int argc, char **argv) {
       if (lidar_pkg->IsFrameReady()) {
         lidar_pub.publish(lidar_pkg->GetLaserScan());
         lidar_pkg->ResetFrameReady();
-#if 1
-        sensor_msgs::LaserScan data = lidar_pkg->GetLaserScan();
-        unsigned int lens = data.ranges.size();
-        ROS_INFO_STREAM("current_speed(hz): " << lidar_pkg->GetSpeed() << " "
-                        << "len: " << lens << " "
-                        << "angle_min: " << RADIAN_TO_ANGLE(data.angle_min) << " "
-                        << "angle_max: " << RADIAN_TO_ANGLE(data.angle_max));
+        ROS_INFO_STREAM("current_speed(hz): " << lidar_pkg->GetSpeed());
         ROS_INFO_STREAM("----------------------------");
-        for (int i = 0; i < lens; i++) {
-          float angle_n = RADIAN_TO_ANGLE(data.angle_min + i * data.angle_increment);
-          ROS_INFO_STREAM("angle: " << angle_n << " "
-                          << "range(m): " << data.ranges[i] << " "
-                          << "intensites: " << data.intensities[i]);
-        }
-#endif
       }
       r.sleep();
     }
   } else {
-    ROS_ERROR(" [ldrobot] fail, port_name is empty!");
+    ROS_ERROR(" [ldrobot] fail, input param <port_name> is empty!");
     exit(EXIT_FAILURE);
   }
 

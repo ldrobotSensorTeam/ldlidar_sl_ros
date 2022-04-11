@@ -1,6 +1,6 @@
 /**
  * @file lipkg.h
- * @author LDRobot (marketing1@ldrobot.com)
+ * @author LDRobot (contact@ldrobot.com)
  * @brief  LiDAR data protocol processing App
  *         This code is only applicable to LDROBOT LiDAR LD00 LD03 LD08 LD14
  * products sold by Shenzhen LDROBOT Co., LTD
@@ -21,6 +21,7 @@
 
 #ifndef __LIPKG_H
 #define __LIPKG_H
+
 #include <sensor_msgs/LaserScan.h>
 #include <stdint.h>
 
@@ -55,7 +56,8 @@ typedef struct __attribute__((packed)) {
 
 class LiPkg {
  public:
-  LiPkg(std::string frame_id, LDVersion ld_version);
+  LiPkg(std::string frame_id, LDVersion ld_version, bool laser_scan_dir, bool enable_angle_crop_func,
+    double angle_crop_min, double angle_crop_max);
   // Lidar spin speed (Hz)
   double GetSpeed(void);
   // time stamp of the packet In milliseconds
@@ -85,6 +87,10 @@ class LiPkg {
   uint16_t timestamp_;
   double speed_;
   long error_times_;
+  bool laser_scan_dir_;
+  bool enable_angle_crop_func_;
+  double angle_crop_min_;
+  double angle_crop_max_;
   LiDARFrameTypeDef pkg;
   std::array<PointData, POINT_PER_PACK> one_pkg_;
   std::vector<PointData> frame_tmp_;
