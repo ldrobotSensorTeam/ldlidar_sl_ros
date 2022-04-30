@@ -56,6 +56,9 @@ $ sudo chmod 777 /dev/ttyUSB0
  <node name="ldlidar_listener_ld14" pkg="ldlidar_sl_ros" type="ldlidar_sl_ros_listen_node" output="screen">
   <param name="topic_name" value="scan"/>
  </node>
+ <!-- publisher tf transform, parents frame is base_link, child frame is base_laser -->
+ <!-- args="x y z yaw pitch roll parents_frame_id child_frame_id period_in_ms"-->
+ <node name="base_to_laser" pkg="tf" type="static_transform_publisher"  args="0.0 0.0 0.18 0 0.0 0.0 base_link base_laser 50"/>
 </launch>
 ```
 ## 2. 编译方法
@@ -86,17 +89,25 @@ $ catkin_make
 ### 3.2. 启动激光雷达节点
 
 - 产品型号为 LDROBOT LiDAR LD14
-
+  - 启动ld14 lidar node:
   ``` bash
-  roslaunch ldlidar_sl_ros ld14.launch
+  $ roslaunch ldlidar_sl_ros ld14.launch
   ```
+  - 启动ld14 lidar node并显示激光数据在Rviz上:
+  ``` bash
+  # if ROS_DISTRO in 'kinetic' or 'melodic'
+  $ roslaunch ldlidar_sl_ros viewer_ld14_kinetic_melodic.launch
+  # if ROS_DISTRO in 'noetic'
+  $ roslaunch ldlidar_sl_ros viewer_ld14_noetic.launch
+  ```
+
 ##   4. 测试
 
 > 代码支持ubuntu16.04 ROS kinetic、ubuntu18.04 ROS melodic、ubuntu20.04 ROS noetic版本下测试，使用rviz可视化。
 
-- 新打开一个终端 (Ctrl + Alt + T),并通过Rviz工具打开readme文件所在目录的rviz文件夹下面的ldlidar.rviz文件
+- 新打开一个终端 (Ctrl + Alt + T),并通过Rviz工具打开readme文件所在目录的rviz文件夹下面的rviz配置文件
 ```bash
-rosrun rviz rviz
+$ rviz
 ```
 
 | 产品型号:          | Fixed Frame: | Topic:        |
@@ -161,6 +172,9 @@ $ sudo chmod 777 /dev/ttyUSB0
  <node name="ldlidar_listener_ld14" pkg="ldlidar_sl_ros" type="ldlidar_sl_ros_listen_node" output="screen">
   <param name="topic_name" value="scan"/>
  </node>
+  <!-- publisher tf transform, parents frame is base_link, child frame is base_laser -->
+ <!-- args="x y z yaw pitch roll parents_frame_id child_frame_id period_in_ms"-->
+ <node name="base_to_laser" pkg="tf" type="static_transform_publisher"  args="0.0 0.0 0.18 0 0.0 0.0 base_link base_laser 50"/>
 </launch>
 ```
 ## step 2: build
@@ -191,18 +205,25 @@ $ catkin_make
   ```
 ### step3.2: start LiDAR node
 - The product is LDROBOT LiDAR LD14
-
+  - start ld14 lidar node:
   ``` bash
-  roslaunch ldlidar_sl_ros ld14.launch
+  $ roslaunch ldlidar_sl_ros ld14.launch
+  ```
+  - start ld14 lidar node and show on the Rviz:
+  ``` bash
+  # if ROS_DISTRO in 'kinetic' or 'melodic'
+  $ roslaunch ldlidar_sl_ros viewer_ld14_kinetic_melodic.launch
+  # if ROS_DISTRO in 'noetic'
+  $ roslaunch ldlidar_sl_ros viewer_ld14_noetic.launch
   ```
 
 ## step 4: test
 
 > The code was tested under ubuntu16.04 ROS kinetic、ubuntu18.04 ROS melodic、ubuntu20.04 ROS noetic, using rviz visualization.
 
-- new a terminal (Ctrl + Alt + T) and use Rviz tool,open the `ldlidar.rviz` file below the rviz folder of the readme file directory
+- new a terminal (Ctrl + Alt + T) and use Rviz tool,open the rviz config file below the rviz folder of the readme file directory
 ```bash
-rosrun rviz rviz
+$ rviz
 ```
 
 | Product:          | Fixed Frame: | Topic:        |
