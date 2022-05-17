@@ -75,7 +75,7 @@ Visualization Manager:
       Max Color: 255; 255; 255
       Max Intensity: 234
       Min Color: 0; 0; 0
-      Min Intensity: 66
+      Min Intensity: 72
       Name: LaserScan
       Position Transformer: XYZ
       Queue Size: 10
@@ -133,7 +133,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 8.35709763
+      Distance: 25.9558792
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1

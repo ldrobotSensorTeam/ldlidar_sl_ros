@@ -62,23 +62,15 @@ uint8_t CalCRC8(const uint8_t *data, uint16_t data_len) {
   return crc;
 }
 
-LiPkg::LiPkg(std::string frame_id, LDVersion ld_version, bool laser_scan_dir, bool enable_angle_crop_func,
-    double angle_crop_min, double angle_crop_max)
-    : frame_id_(frame_id),
-      ld_version_(ld_version),
+LiPkg::LiPkg(LDVersion ld_version, bool laser_scan_dir)
+    : ld_version_(ld_version),
+      laser_scan_dir_(laser_scan_dir),
       timestamp_(0),
       speed_(0),
       error_times_(0),
-      is_frame_ready_(false),
-      is_pkg_ready_(false),
-      laser_scan_dir_(laser_scan_dir),
-      enable_angle_crop_func_(enable_angle_crop_func),
-      angle_crop_min_(angle_crop_min),
-      angle_crop_max_(angle_crop_max) {
+      is_frame_ready_(false){
   
 }
-
-double LiPkg::GetSpeed(void) { return speed_ / 360.0; }
 
 bool LiPkg::AnalysisOne(uint8_t byte) {
   static enum {
@@ -151,12 +143,8 @@ bool LiPkg::Parse(const uint8_t *data, long len) {
             data.angle -= 360.0;
           }
           data.intensity = pkg.point[i].intensity;
-          one_pkg_[i] = data;
           frame_tmp_.push_back(PointData(data.angle, data.distance, data.intensity));
         }
-        // prevent angle invert
-        one_pkg_.back().angle = end;
-        is_pkg_ready_ = true;
       }
     }
   }
@@ -184,8 +172,10 @@ bool LiPkg::AssemblePacket() {
       tmp = sb.NearFilter(data);
       std::sort(tmp.begin(), tmp.end(), [](PointData a, PointData b) { return a.angle < b.angle; });
       if (tmp.size() > 0) {
-        ToLaserscan(tmp);
-        is_frame_ready_ = true;
+        if (tmp.front().angle < 1.0) {
+          FillLaserScanData(tmp);
+          SetFrameReady();
+        }
         frame_tmp_.erase(frame_tmp_.begin(), frame_tmp_.begin() + count);
         return true;
       }
@@ -197,11 +187,65 @@ bool LiPkg::AssemblePacket() {
   return false;
 }
 
-const std::array<PointData, POINT_PER_PACK> &LiPkg::GetPkgData(void) {
-  is_pkg_ready_ = false;
-  return one_pkg_;
+void LiPkg::CommReadCallback(const char *byte, size_t len) {
+  if (this->Parse((uint8_t *)byte, len)) {
+    this->AssemblePacket();
+  }
 }
 
+double LiPkg::GetSpeed(void) { 
+  return (speed_ / 360.0);  // unit is hz 
+}
+
+uint16_t LiPkg::GetSpeedOrigin(void) {
+  return speed_;
+}
+
+ uint16_t LiPkg::GetTimestamp(void) {
+   return timestamp_;
+ }
+
+bool LiPkg::IsFrameReady(void) {
+  return is_frame_ready_;
+}
+
+
+void LiPkg::ResetFrameReady(void) {
+  {
+    std::lock_guard<std::mutex> lock(mutex_lock_);
+    is_frame_ready_ = false;
+  }
+}
+
+void LiPkg::SetFrameReady(void) {
+  {
+    std::lock_guard<std::mutex> lock(mutex_lock_);
+    is_frame_ready_ = true;
+  }
+}
+
+long LiPkg::GetErrorTimes(void) {
+  return error_times_; 
+}
+
+Points2D LiPkg::GetLaserScanData(void) {
+  return laser_scan_data_;
+}
+
+void LiPkg::FillLaserScanData(Points2D& src) {
+  laser_scan_data_ = src;
+}
+
+
+
+
+
+
+
+
+
+
+#if 0
 void LiPkg::ToLaserscan(std::vector<PointData> src) {
   float angle_min, angle_max, range_min, range_max, angle_increment;
 
@@ -276,6 +320,7 @@ void LiPkg::ToLaserscan(std::vector<PointData> src) {
     }
   }
 }
+#endif
 
 /********************* (C) COPYRIGHT SHENZHEN LDROBOT CO., LTD *******END OF
  * FILE ********/

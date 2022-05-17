@@ -1,6 +1,6 @@
 /**
  * @file slbf.h
- * @author LDRobot (contact@ldrobot.com)
+ * @author LDRobot (marketing1@ldrobot.com)
  * @brief   LiDAR near-range filtering algorithm
  *         This code is only applicable to LDROBOT LiDAR LD00 LD03 LD08 LD14
  * products sold by Shenzhen LDROBOT Co., LTD

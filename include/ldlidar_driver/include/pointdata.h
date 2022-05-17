@@ -26,6 +26,11 @@
 #include <iostream>
 #include <vector>
 
+enum class LDVersion {
+  LD_14,  // Fourteen generation lidar
+  NO_VER
+};
+
 struct PointData {
   // Polar coordinate representation
   float angle;         // Angle ranges from 0 to 359 degrees
