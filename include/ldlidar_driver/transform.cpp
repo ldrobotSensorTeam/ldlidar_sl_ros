@@ -21,6 +21,8 @@
 
 #include "transform.h"
 
+namespace ldlidar {
+
 /*!
         \brief     transfer the origin to the center of lidar circle
         \param[in]
@@ -31,9 +33,9 @@
         \param[out]  data
         \retval      Data after coordinate conversion
 */
-SlTransform::SlTransform(LDVersion version, bool to_right_hand_) {
+SlTransform::SlTransform(LDType version, bool to_right_hand_) {
   switch (version) {
-    case LDVersion::LD_14:
+    case LDType::LD_14:
       offset_x_ = 5.9;
       offset_y_ = -20.14;
       break;
@@ -55,7 +57,6 @@ Points2D SlTransform::Transform(const Points2D &data) {
     if (n.distance > 0) {
       double x = n.distance + offset_x_;
       double y = n.distance * 0.11923 + offset_y_;
-      double d = sqrt(x * x + y * y);
       double shift = atan(y / x) * 180.f / 3.14159;
       // Choose whether to use the right-hand system according to the flag
       if (to_right_hand_) {
@@ -66,7 +67,6 @@ Points2D SlTransform::Transform(const Points2D &data) {
       }
       last_shift_delta = shift;
     } else {
-      // n.distance == 0
       if (to_right_hand_) {
         float right_hand = (360.f - n.angle);
         angle = right_hand + last_shift_delta;
@@ -83,7 +83,7 @@ Points2D SlTransform::Transform(const Points2D &data) {
     }
     
     switch (version_) {
-      case LDVersion::LD_14:
+      case LDType::LD_14:
         if (n.distance == 0) {
           tmp2.push_back(PointData(angle, n.distance, 0));
         } else {
@@ -100,5 +100,6 @@ Points2D SlTransform::Transform(const Points2D &data) {
 
 SlTransform::~SlTransform() {}
 
+} // namespace ldlidar 
 /********************* (C) COPYRIGHT SHENZHEN LDROBOT CO., LTD *******END OF
  * FILE ********/

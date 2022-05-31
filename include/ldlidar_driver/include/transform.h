@@ -24,22 +24,25 @@
 #include <math.h>
 
 #include <algorithm>
-#include <vector>
 
 #include "pointdata.h"
+
+namespace ldlidar {
 
 class SlTransform {
  private:
   bool to_right_hand_ = true;
   double offset_x_;
   double offset_y_;
-  LDVersion version_;
+  LDType version_;
 
  public:
-  SlTransform(LDVersion version, bool to_right_hand_ = false);
+  SlTransform(LDType version, bool to_right_hand_ = false);
   Points2D Transform(const Points2D &data);
   ~SlTransform();
 };
+
+} // namespace ldlidar
 
 #endif  // __TRANSFORM_H
 /********************* (C) COPYRIGHT SHENZHEN LDROBOT CO., LTD *******END OF
