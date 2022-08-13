@@ -123,7 +123,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 ${CMAKE_CURRENT_SOURCE_DIR}/include
-${CMAKE_CURRENT_SOURCE_DIR}/include/ldlidar_driver/include
+${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include
 ${catkin_INCLUDE_DIRS}
 )
 
@@ -135,7 +135,7 @@ ${catkin_INCLUDE_DIRS}
 #endif()
 
 
-file(GLOB  LDLIDAR_DRIVER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/include/ldlidar_driver/*.cpp)
+file(GLOB  LDLIDAR_DRIVER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/*.cpp)
 file(GLOB  MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/publish_node/*.cpp)
 file(GLOB  LISTEN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/listen_node/*.cpp)
 
