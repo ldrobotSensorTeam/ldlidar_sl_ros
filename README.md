@@ -62,8 +62,14 @@ sudo chmod 777 /dev/ttyUSB0
 </launch>
 ```
 ## 2. 编译方法
+- 安装src/目录下功能包的依赖
+```bash
+cd ~/ldlidar_ros_ws
 
-使用catkin编译.
+rosdep install --from-paths src --ignore-src  -r -y
+```
+
+- 使用catkin编译.
 
 ```bash
 cd ~/ldlidar_ros_ws
@@ -180,9 +186,14 @@ sudo chmod 777 /dev/ttyUSB0
 </launch>
 ```
 ## step 2: build
+- install package depend
+```bash
+cd ~/ldlidar_ros_ws
 
-Run the following command.
+rosdep install --from-paths src --ignore-src  -r -y
+```
 
+- build compile
 ```bash
 cd ~/ldlidar_ros_ws
 
