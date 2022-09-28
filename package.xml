@@ -57,6 +57,7 @@
   <!-- exec_depend>sensor_msgs</exec_depend -->
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
   <exec_depend>tf</exec_depend>
   <!-- The export tag contains other, unspecified, tags -->
   <!-- export -->

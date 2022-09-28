@@ -2,13 +2,19 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ldlidar_sl_ros)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-set (IS_WARLL "OFF") # "ON" or "OFF"
-if(${IS_WARLL} MATCHES "OFF")
-  set(CMAKE_CXX_FLAGS "-std=c++11 ${CMAKE_CXX_FLAGS}")
-  message(STATUS "optional:-std=c++11")
+if(${CMAKE_BUILD_TYPE} MATCHES  "Release")
+  set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -std=c++11 -Wall")
+  message(STATUS "Mode: Release")
+  message(STATUS "optional:-std=c++11 -Wall")
+elseif(${CMAKE_BUILD_TYPE} MATCHES  "Debug") 
+  set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -std=c++11 -Wall -Wextra -Wpedantic -g2 -ggdb")
+  message(STATUS "Mode: Debug")
+  message(STATUS "optional:-std=c++11 -Wall -Wextra -Wpedantic -g2 -ggdb")
 else()
-  set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra ${CMAKE_CXX_FLAGS}")
-  message(STATUS "optional:-std=c++11 -Wall -Wextra ")
+  set(CMAKE_BUILD_TYPE "Release") 
+  set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -std=c++11 -Wall -Wextra")
+  message(STATUS "Mode: Release")
+  message(STATUS "optional:-std=c++11 -Wall -Wextra")
 endif()
 
 ## Find catkin macros and libraries
@@ -17,6 +23,7 @@ endif()
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   sensor_msgs
+  geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -122,27 +129,37 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-${CMAKE_CURRENT_SOURCE_DIR}/include
-${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include
-${catkin_INCLUDE_DIRS}
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/core/
+  ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/dataprocess/
+  ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/filter/
+  ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/logger/
+  ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/include/serialcom/
+  ${catkin_INCLUDE_DIRS}
 )
 
-## Get current directory files
-#aux_source_directory(./src file_name)
-#if(file_name MATCHES "slbf.cpp")
-#  add_definitions(-D"USE_SLBF")
-#  message("-- #define USE_SLBF")
-#endif()
+file(GLOB  LDLIDAR_DRI_CORE ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/src/core/*.cpp)
+file(GLOB  LDLIDAR_DRI_DATARPC ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/src/dataprocess/*.cpp)
+file(GLOB  LDLIDAR_DRI_FILTER ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/src/filter/*.cpp)
+file(GLOB  LDLIDAR_DRI_LOGGER ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/src/logger/*.cpp)
+file(GLOB  LDLIDAR_DRI_SERIAL ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/src/serialcom/*.cpp)
 
-
-file(GLOB  LDLIDAR_DRIVER_SRC ${CMAKE_CURRENT_SOURCE_DIR}/ldlidar_driver/*.cpp)
 file(GLOB  MAIN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/publish_node/*.cpp)
 file(GLOB  LISTEN_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/listen_node/*.cpp)
 
-add_executable(${PROJECT_NAME}_node  ${MAIN_SRC} ${LDLIDAR_DRIVER_SRC})
+add_executable(${PROJECT_NAME}_node
+  ${MAIN_SRC} 
+  ${LDLIDAR_DRI_CORE} 
+  ${LDLIDAR_DRI_DATARPC} 
+  ${LDLIDAR_DRI_FILTER} 
+  ${LDLIDAR_DRI_LOGGER} 
+  ${LDLIDAR_DRI_SERIAL}
+)
 target_link_libraries(${PROJECT_NAME}_node pthread ${catkin_LIBRARIES})
 
-add_executable(${PROJECT_NAME}_listen_node  ${LISTEN_SRC})
+add_executable(${PROJECT_NAME}_listen_node  
+  ${LISTEN_SRC}
+)
 target_link_libraries(${PROJECT_NAME}_listen_node  ${catkin_LIBRARIES})
 
 ## Declare a C++ library

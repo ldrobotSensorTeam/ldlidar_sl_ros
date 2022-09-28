@@ -23,6 +23,9 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
+#include <sensor_msgs/PointCloud.h>
+#include <sensor_msgs/ChannelFloat32.h>
+#include <geometry_msgs/Point32.h>
 #include <string>
 
 struct LaserScanSetting

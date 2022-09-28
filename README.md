@@ -43,7 +43,22 @@ sudo chmod 777 /dev/ttyUSB0
   <param name="product_name" value="LDLiDAR_LD14"/>
   <param name="topic_name" value="$(arg topic_name)"/>
   <param name="frame_id" value="$(arg frame_id)"/>
-  <param name="port_name" value ="$(arg port_name)"/>
+  <param name="port_name" value ="$(arg port_na<?xml version="1.0"?>
+<launch>
+<arg name="laser_scan_topic_name" default="scan"/>
+<arg name="point_cloud_2d_topic_name" default="pointcloud2d"/>
+<arg name="frame_id" default="base_laser"/>
+<arg name="port_name" default="/dev/ttyUSB0"/>
+<arg name="fix_to_base_link" default="true" />
+
+<!-- LDROBOT LiDAR message publisher node -->
+ <node name="ldlidar_publisher_ld14" pkg="ldlidar_sl_ros" type="ldlidar_sl_ros_node" output="screen">
+  <param name="product_name" value="LDLiDAR_LD14"/>
+  <param name="laser_scan_topic_name" value="$(arg laser_scan_topic_name)"/>
+  <param name="point_cloud_2d_topic_name" value="$(arg point_cloud_2d_topic_name)"/>
+  <param name="frame_id" value="$(arg frame_id)"/>
+  <param name="port_name" value="$(arg port_name)"/>
+  <param name="serial_baudrate" value="115200"/>
   <!-- Set laser scan directon: -->
   <!--    1. Set counterclockwise, example: <param name="laser_scan_dir" type="bool" value="true"/> -->
   <!--    2. Set clockwise,        example: <param name="laser_scan_dir" type="bool" value="false"/> -->
@@ -159,7 +174,8 @@ sudo chmod 777 /dev/ttyUSB0
 ``` xml
 <?xml version="1.0"?>
 <launch>
-<arg name="topic_name" default="scan"/>
+<arg name="laser_scan_topic_name" default="scan"/>
+<arg name="point_cloud_2d_topic_name" default="pointcloud2d"/>
 <arg name="frame_id" default="base_laser"/>
 <arg name="port_name" default="/dev/ttyUSB0"/>
 <arg name="fix_to_base_link" default="true" />
@@ -167,9 +183,11 @@ sudo chmod 777 /dev/ttyUSB0
 <!-- LDROBOT LiDAR message publisher node -->
  <node name="ldlidar_publisher_ld14" pkg="ldlidar_sl_ros" type="ldlidar_sl_ros_node" output="screen">
   <param name="product_name" value="LDLiDAR_LD14"/>
-  <param name="topic_name" value="$(arg topic_name)"/>
+  <param name="laser_scan_topic_name" value="$(arg laser_scan_topic_name)"/>
+  <param name="point_cloud_2d_topic_name" value="$(arg point_cloud_2d_topic_name)"/>
   <param name="frame_id" value="$(arg frame_id)"/>
-  <param name="port_name" value ="$(arg port_name)"/>
+  <param name="port_name" value="$(arg port_name)"/>
+  <param name="serial_baudrate" value="115200"/>
   <!-- Set laser scan directon: -->
   <!--    1. Set counterclockwise, example: <param name="laser_scan_dir" type="bool" value="true"/> -->
   <!--    2. Set clockwise,        example: <param name="laser_scan_dir" type="bool" value="false"/> -->
