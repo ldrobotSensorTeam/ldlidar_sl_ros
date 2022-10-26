@@ -111,23 +111,10 @@ int main(int argc, char **argv) {
 
     switch (node->GetLaserScanData(laser_scan_points, 1500)){
       case ldlidar::LidarStatus::NORMAL: {
-        double lidar_spin_freq = 0;
-        node->GetLidarSpinFreq(lidar_spin_freq);
-        ToLaserscanMessagePublish(laser_scan_points, lidar_spin_freq, setting, lidar_pub_laserscan);
+        double lidar_scan_freq = 0;
+        node->GetLidarScanFreq(lidar_scan_freq);
+        ToLaserscanMessagePublish(laser_scan_points, lidar_scan_freq, setting, lidar_pub_laserscan);
         ToSensorPointCloudMessagePublish(laser_scan_points, setting, lidar_pub_pointcloud);
-        break;
-      }
-      case ldlidar::LidarStatus::ERROR: {
-        uint8_t errcode = node->GetLidarErrorCode();
-        ROS_ERROR("ldlidar feedback errcode:%d",errcode);
-        if (LIDAR_ERROR_BLOCKING == errcode) {
-          ROS_WARN("ldlidar blocking");
-        } else if (LIDAR_ERROR_OCCLUSION == errcode) {
-          ROS_WARN("ldlidar occlusion");
-        } else if (LIDAR_ERROR_BLOCKING_AND_OCCLUSION == errcode) {
-          ROS_WARN("ldlidar blocking and occlusion");
-        }
-        node->Stop();
         break;
       }
       case ldlidar::LidarStatus::DATA_TIME_OUT: {
@@ -136,9 +123,6 @@ int main(int argc, char **argv) {
         break;
       }
       case ldlidar::LidarStatus::DATA_WAIT: {
-        break;
-      }
-      case ldlidar::LidarStatus::STOP: {
         break;
       }
       default:
