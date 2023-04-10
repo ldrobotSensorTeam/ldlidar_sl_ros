@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
   std::string point_cloud_2d_topic_name;
 	std::string port_name;
   LaserScanSetting setting;
-  int serial_baudrate = 0;
-  ldlidar::LDType lidartypename = ldlidar::LDType::NO_VER;
+  int serial_baudrate;
+  ldlidar::LDType product_type;
 
   nh_private.getParam("product_name", product_name);
 	nh_private.param("laser_scan_topic_name", laser_scan_topic_name, std::string("scan"));
@@ -53,9 +53,9 @@ int main(int argc, char **argv) {
   nh_private.param("angle_crop_min", setting.angle_crop_min, double(0.0));
   nh_private.param("angle_crop_max", setting.angle_crop_max, double(0.0));
 
-  ldlidar::LDLidarDriver* node = new ldlidar::LDLidarDriver();
+  ldlidar::LDLidarDriver* lidar_drv = new ldlidar::LDLidarDriver();
 
-  ROS_INFO("LDLiDAR SDK Pack Version is:%s", node->GetLidarSdkVersionNumber().c_str());
+  ROS_INFO("LDLiDAR SDK Pack Version is:%s", lidar_drv->GetLidarSdkVersionNumber().c_str());
   ROS_INFO("ROS param input: ");
   ROS_INFO("<product_name>: %s", product_name.c_str());
   ROS_INFO("<laser_scan_topic_name>: %s", laser_scan_topic_name.c_str());
@@ -68,30 +68,32 @@ int main(int argc, char **argv) {
   ROS_INFO("<angle_crop_min>: %f", setting.angle_crop_min);
   ROS_INFO("<angle_crop_max>: %f", setting.angle_crop_max);
 
-  node->RegisterGetTimestampFunctional(std::bind(&GetTimestamp)); 
+  lidar_drv->RegisterGetTimestampFunctional(std::bind(&GetTimestamp)); 
 
-  node->EnableFilterAlgorithnmProcess(true);
+  lidar_drv->EnableFilterAlgorithnmProcess(true);
 
   if (port_name.empty()) {
     ROS_ERROR("fail, input param <port_name> is empty!");
     exit(EXIT_FAILURE);
   }
 
-  if(product_name == "LDLiDAR_LD14") {
-    lidartypename = ldlidar::LDType::LD_14;
+  if(!strcmp(product_name.c_str(), "LDLiDAR_LD14")) {
+    product_type = ldlidar::LDType::LD_14;
+  } else if(!strcmp(product_name.c_str(), "LDLiDAR_LD14P")) {
+    product_type = ldlidar::LDType::LD_14P_4000HZ; // lidar frequence of measurement is 4KHz
   } else{
     ROS_ERROR("Error, input param <product_name> is fail!!");
     exit(EXIT_FAILURE);
   }
 
-  if (node->Start(lidartypename, port_name, serial_baudrate)) {
-    ROS_INFO("ldlidar node start is success");
+  if (lidar_drv->Start(product_type, port_name, serial_baudrate)) {
+    ROS_INFO("ldlidar driver start is success");
   } else {
-    ROS_ERROR("ldlidar node start is fail");
+    ROS_ERROR("ldlidar driver start is fail");
     exit(EXIT_FAILURE);
   }
 
-  if (node->WaitLidarCommConnect(3500)) {
+  if (lidar_drv->WaitLidarCommConnect(3500)) {
     ROS_INFO("ldlidar communication is normal.");
   } else {
     ROS_ERROR("ldlidar communication is abnormal.");
@@ -109,17 +111,17 @@ int main(int argc, char **argv) {
   ROS_INFO("start normal, pub lidar data");
   while (ros::ok() && ldlidar::LDLidarDriver::IsOk()) {
 
-    switch (node->GetLaserScanData(laser_scan_points, 1500)){
+    switch (lidar_drv->GetLaserScanData(laser_scan_points, 1500)){
       case ldlidar::LidarStatus::NORMAL: {
         double lidar_scan_freq = 0;
-        node->GetLidarScanFreq(lidar_scan_freq);
+        lidar_drv->GetLidarScanFreq(lidar_scan_freq);
         ToLaserscanMessagePublish(laser_scan_points, lidar_scan_freq, setting, lidar_pub_laserscan);
         ToSensorPointCloudMessagePublish(laser_scan_points, setting, lidar_pub_pointcloud);
         break;
       }
       case ldlidar::LidarStatus::DATA_TIME_OUT: {
         ROS_ERROR("ldlidar point cloud data publish time out, please check your lidar device.");
-        node->Stop();
+        lidar_drv->Stop(); 
         break;
       }
       case ldlidar::LidarStatus::DATA_WAIT: {
@@ -132,10 +134,10 @@ int main(int argc, char **argv) {
     r.sleep();
   }
 
-  node->Stop();
+  lidar_drv->Stop();
 
-  delete node;
-  node = nullptr;
+  delete lidar_drv;
+  lidar_drv = nullptr;
   
   return 0;
 }
